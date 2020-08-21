@@ -1,5 +1,11 @@
 module Peger
 
-greet() = print("Hello World!")
+include("rule.jl")
 
-end # module
+function readPEG(filename::String)
+    texts = open(filename,"r") |> readlines
+    filter!(x -> length(x) > 0, texts)
+    foreach(println, texts)
+end
+
+end
