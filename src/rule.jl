@@ -1,9 +1,11 @@
 @enum Pattern begin
+    root
     rule_name
     choice          #/
     symbol          #""
     group           #()
     one_of          #[]
+    assign          #{}
     plus            #+
     asterisk        #*
     question        #?
@@ -13,16 +15,23 @@
     not             #^
 end
 
-mutable struct PartsType
-    pat::Pattern
-    child1::Array{PartsType}
-    child2::Array{PartsType}
-end
-
 mutable struct Expression
-    parts::Array{Any}
+    pattern::Pattern
+    child1::Array{Expression}
+    child2::Array{Expression}
+    option::Any
 
-    function Expression(part::String)
+    function Expression(pat::Pattern, parts::String)
+        if pat == root::Pattern
+            c1 = Array{Expression}([])
+            c2 = Array{Expression}([])
+
+        else
+            nothing
+        end
+    end
+
+    function Expression(parts::String)
 
     end
 end
@@ -37,7 +46,7 @@ mutable struct Rule
         if length(line) == length(len)
             m = match(r"(\w+)\s*<-\s*(.*)", line)
             (name, expr) = m.captures
-            new(name, Expression(expr))
+            new(name, Expression(root::Pattern, expr))
         else
             nothing
         end
