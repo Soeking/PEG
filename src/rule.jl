@@ -21,19 +21,77 @@ mutable struct Expression
     child2::Array{Expression}
     option::Any
 
+    function expr_array(s::String)
+        array = Array{Expression}([])
+
+        array
+    end
+
     function Expression(pat::Pattern, parts::String)
         if pat == root::Pattern
-            c1 = Array{Expression}([])
-            c2 = Array{Expression}([])
-
+            expr = Expression()
+            expr.child1 = expr_array(parts)
+            expr
+        elseif pat == plus::Pattern
+            c = parts[1]
+            expr = Expression(pat)
+            if c == '('
+                m = match(r"^\(\s*(.*)\s*\)$",parts)
+                try
+                    Expression(group::Pattern, m.captures[1]) |> x->push!(expr.child1, x)
+                catch
+                    println("\"()\" error")
+                end
+            elseif c == '['
+                m = match(r"^\[\s*(.*)\]$",parts)
+                try
+                    Expression(one_of::Pattern, m.captures[1]) |> x->push!(expr.child1, x)
+                catch
+                    println("\"[]\" error")
+                end
+            elseif c == '\"'
+                m = match(r"^\"(.*)\"$",parts)
+                try
+                    Expression(symbol::Pattern, m.captures[1]) |> x->push!(expr.child1, x)
+                catch
+                    println("\"\" error")
+                end
+            elseif c == '\\'
+                try
+                    Expression(escape::Pattern, parts[2]) |> x->push!(expr.child1, x)
+                catch
+                    println("\"\\\" error")
+                end
+            elseif c == '.'
+                try
+                    Expression(everything::Pattern) |> x->push!(expr.child1, x)
+                catch
+                    println("\".\" error")
+                end
+            else
+                try
+                    Expression(rule_name::Pattern, parts) |> x->push!(expr.child1, x)
+                catch
+                    println("name error")
+                end
+            end
+            expr
+        elseif pat == asterisk::Pattern
+        elseif pat == question::Pattern
+        elseif pat == assign::Pattern
+        elseif pat == group::Pattern
+        elseif pat == one_of::Pattern
+        elseif pat == rule_name::Pattern
+        elseif pat == symbol::Pattern
+        elseif pat == escape::Pattern
         else
             nothing
         end
     end
 
-    function Expression(parts::String)
+    Expression(left::String, right::String) = new(choice::Pattern, expr_array(left), expr_array(right), nothing)
 
-    end
+    Expression(pat::Pattern = root::Pattern) = new(pat, Array{Expression}([]), Array{Expression}([]), nothing)
 end
 
 mutable struct Rule
