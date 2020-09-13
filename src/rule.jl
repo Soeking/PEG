@@ -27,7 +27,7 @@ mutable struct Expression
         array
     end
 
-    function loop_flow(c::Char, expr::Expression)
+    function loop_flow(c::Char, expr::Expression, parts::String)
         if c == '('
                 m = match(r"^\(\s*(.*)\s*\)$",parts)
                 try
@@ -81,8 +81,22 @@ mutable struct Expression
             loop_flow(c, expr)
             expr
         elseif pat == asterisk::Pattern
+            c = parts[1]
+            expr = Expression(asterisk::Pattern)
+            loop_flow(c, expr)
+            expr
         elseif pat == question::Pattern
+            c = parts[1]
+            expr = Expression(question::Pattern)
+            loop_flow(c, expr)
+            expr
         elseif pat == assign::Pattern
+            c = parts[1]
+            expr = Expression(assign::Pattern)
+            loop_flow(c, expr)
+            m = match(r"\{(\d+),(\d+)\}$", parts)
+            expr.option = (m.captures[1],m.captures[2])
+            expr
         elseif pat == group::Pattern
         elseif pat == one_of::Pattern
         elseif pat == rule_name::Pattern
