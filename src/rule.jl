@@ -27,15 +27,8 @@ mutable struct Expression
         array
     end
 
-    function Expression(pat::Pattern, parts::String)
-        if pat == root::Pattern
-            expr = Expression()
-            expr.child1 = expr_array(parts)
-            expr
-        elseif pat == plus::Pattern
-            c = parts[1]
-            expr = Expression(pat)
-            if c == '('
+    function loop_flow(c::Char, expr::Expression)
+        if c == '('
                 m = match(r"^\(\s*(.*)\s*\)$",parts)
                 try
                     Expression(group::Pattern, m.captures[1]) |> x->push!(expr.child1, x)
@@ -75,6 +68,17 @@ mutable struct Expression
                     println("name error")
                 end
             end
+    end
+
+    function Expression(pat::Pattern, parts::String)
+        if pat == root::Pattern
+            expr = Expression()
+            expr.child1 = expr_array(parts)
+            expr
+        elseif pat == plus::Pattern
+            c = parts[1]
+            expr = Expression(plus::Pattern)
+            loop_flow(c, expr)
             expr
         elseif pat == asterisk::Pattern
         elseif pat == question::Pattern
